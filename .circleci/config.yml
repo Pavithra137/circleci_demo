@@ -68,7 +68,7 @@ jobs:
               --url https://circleci.com/api/v2/project/github/Pavithra137/WebApp/pipeline \
               --header "Circle-Token: $CIRCLECI_API_KEY" \
               --header "content-type: application/json" \
-              --data '{"tag":"$GIT_TAG"}'
+              --data '{"tag":"qa.1"}'
 
   deploy: 
     
