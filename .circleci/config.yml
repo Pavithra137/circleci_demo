@@ -43,9 +43,10 @@ qa_filter: &qa_filter
     tags:
       only:
         - /^qa.*/
-# defaults:
-#   - &step_git_tag |
-#     echo "export GIT_TAG=echo ${git tag -l --points-at HEAD}" >> $BASH_ENV
+defaults:
+  - &step_git_tag |
+    # echo "export GIT_TAG=echo ${git tag -l --points-at HEAD}" >> $BASH_ENV
+    echo "export GIT_TAG=${CIRCLE_TAG}" >> $BASH_ENV
 jobs: 
 
   build-and-test: 
