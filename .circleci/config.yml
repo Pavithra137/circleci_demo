@@ -67,6 +67,19 @@ jobs:
               --header "content-type: application/json" \
               --data '{"tag":"dev.1.0"}'
 
+  deploy: 
+    
+    docker:
+      - image: tomcat:latest
+        auth:
+            username: pavithra2818
+            password: Pavi@2818
+    steps:
+      - checkout
+      - run:
+          name: Branch
+          command: echo "${CIRCLE_BRANCH}", "${PIPELINE_GIT_TAG}"
+
           # Update this line with the directory that contains your tests project file
 #           working_directory: ~/project/App.Tests
 #           name: Run tests
@@ -117,7 +130,7 @@ workflows:
 
   qa-plan-deploy:
     jobs: 
-      - build-and-test:
+      - deploy:
           <<: *qa_filter
           name: checkout-code-qa
           context: DEV 
