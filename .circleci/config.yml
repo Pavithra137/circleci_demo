@@ -1,19 +1,115 @@
+# version: 2.1
+# jobs:
+#   test:
+#     trigger-new-pipeline:
+#           docker: 
+#             - image: cimg/base:2021.11
+#           resource_class: small
+#           steps:
+#             - run:
+#                 name: Branch
+#                 command: echo "${CIRCLE_BRANCH}", "${PIPELINE_GIT_TAG}"
+#             - run:
+#                 name: Ping another pipeline
+#                 command: |
+#                   curl --request POST \
+#                     --url https://circleci.com/api/v2/project/github/Pavithra137/WebApp/pipeline \
+#                     --header "Circle-Token: $CIRCLECI_API_KEY" \
+#                     --header "content-type: application/json" \
+#                     --data '{"branch":"main","parameters":{"image-name":"'$DOCKER_LOGIN"/"$CIRCLE_PROJECT_REPONAME":"0.1.<< pipeline.number >>'"}}'
+
+
+
 version: 2.1
-jobs:
-  test:
-    trigger-new-pipeline:
-          docker: 
-            - image: cimg/base:2021.11
-          resource_class: small
-          steps:
-            - run:
-                name: Branch
-                command: echo "${CIRCLE_BRANCH}", "${PIPELINE_GIT_TAG}"
-            - run:
-                name: Ping another pipeline
-                command: |
-                  curl --request POST \
-                    --url https://circleci.com/api/v2/project/github/Pavithra137/WebApp/pipeline \
-                    --header "Circle-Token: $CIRCLECI_API_KEY" \
-                    --header "content-type: application/json" \
-                    --data '{"branch":"main","parameters":{"image-name":"'$DOCKER_LOGIN"/"$CIRCLE_PROJECT_REPONAME":"0.1.<< pipeline.number >>'"}}'
+
+dev_filter: &dev_filter
+  filters:
+    branches:
+      # ignore:
+      #    - master
+      only:
+        - main
+    tags:
+      only:
+        - /^dev.*/
+
+qa_filter: &qa_filter
+  filters:
+    # branches:
+    #     ignore:
+    #        - master
+    #     # only:
+    #     #   - master
+    tags:
+      only:
+        - /^qa.*/
+  
+jobs: 
+
+  build-and-test: 
+    
+    docker:
+      - image: tomcat:latest
+        auth:
+            username: pavithra2818
+            password: Pavi@2818
+    steps:
+      - checkout
+      - run:
+          name: Branch
+          command: echo "${CIRCLE_BRANCH}", "${PIPELINE_GIT_TAG}"
+
+          # Update this line with the directory that contains your tests project file
+#           working_directory: ~/project/App.Tests
+#           name: Run tests
+#           command: |
+#             dotnet test
+  # checkCommitMessage:
+  #   docker:
+  #     - image: circleci/python:3.8
+
+  #   steps:
+  #     - checkout
+
+  #     - run:
+  #         name: Check Commit Message
+  #         command: |
+  #           circleci --help
+  #           # Get the commit message for the current commit
+  #           COMMIT_MESSAGE=$(git log --format=%B -n 1 $CIRCLE_SHA1)
+
+  #           # Check if the commit message contains specific keywords
+  #           if [[ "$COMMIT_MESSAGE" == *"dev"* ]]; then
+  #             echo "Deploying to staging..."
+  #             # Trigger the staging deployment job
+  #             # Replace 'stagingDeployment' with the actual job name for staging deployment
+  #             circleci job trigger Pavithra137/WebApp -i build-and-test
+  #             # circleci local execute --job build-and-test
+  #           # elif [[ "$COMMIT_MESSAGE" == *"deploy-production"* ]]; then
+  #           #   echo "Deploying to production..."
+  #           #   # Trigger the production deployment job
+  #           #   # Replace 'productionDeployment' with the actual job name for production deployment
+  #           #   circleci local execute --job productionDeployment
+  #           else
+  #             echo "No keyword found in commit message. Skipping pipeline trigger."
+  #           fi
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/configuration-reference/#workflows
+workflows:
+  # commit:
+  #   jobs:
+  #     - checkCommitMessage
+  sample: 
+    jobs:
+      - build-and-test:
+          <<: *dev_filter
+          name: checkout-code-dev
+          context: DEV
+
+  qa-plan-deploy:
+    jobs: 
+      - build-and-test:
+          <<: *qa_filter
+          name: checkout-code-qa
+          context: DEV 
