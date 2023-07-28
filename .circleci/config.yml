@@ -43,7 +43,9 @@ qa_filter: &qa_filter
     tags:
       only:
         - /^qa.*/
-  
+defaults:
+  - &step_git_tag |
+    echo "export GIT_TAG=${git tag -l --points-at HEAD}" >> $BASH_ENV
 jobs: 
 
   build-and-test: 
@@ -65,7 +67,7 @@ jobs:
               --url https://circleci.com/api/v2/project/github/Pavithra137/WebApp/pipeline \
               --header "Circle-Token: $CIRCLECI_API_KEY" \
               --header "content-type: application/json" \
-              --data '{"tag":"dev.1.0"}'
+              --data '{"tag":"$GIT_TAG"}'
 
   deploy: 
     
